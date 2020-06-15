@@ -1,0 +1,170 @@
+import React, { Fragment } from "react";
+import { useMutation } from "@apollo/react-hooks";
+import { User as UserData } from "../../../../lib/graphql/queries/User/__generated__/User";
+import { DISCONNECT_STRIPE } from "../../../../lib/graphql/mutations";
+import {
+    DisconnectStripe as DisconnectStripeData
+} from "../../../../lib/graphql/mutations/DisconnectStripe/__generated__/DisconnectStripe";
+import { Avatar, Button, Card, Divider, Tag, Typography } from "antd";
+import {
+    displayErrorMessage,
+    displaySuccessNotification,
+    formatListingPrice 
+} from "../../../../lib/utils";
+import { Viewer } from "../../../../lib/types";
+
+
+// (a)
+interface Props {
+    user: UserData["user"];
+    viewer: Viewer;
+    viewerIsUser: boolean;
+    setViewer: (viewer: Viewer) => void;
+    handleUserRefetch: () => Promise<void>;
+}
+
+const stripeAuthUrl = `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${process.env.REACT_APP_S_CLIENT_ID}&scope=read_write`;
+
+const { Paragraph, Text, Title } = Typography;
+
+export const UserProfile = ({ 
+    user, 
+    viewer, 
+    viewerIsUser, 
+    setViewer,
+    handleUserRefetch 
+}: Props) => {
+    const [disconnectStripe, { loading }] = useMutation<DisconnectStripeData>(
+        DISCONNECT_STRIPE, {
+            onCompleted: data => {
+                if (data && data.disconnectStripe) {
+                    setViewer({ ...viewer, hasWallet: data.disconnectStripe.hasWallet });
+                    displaySuccessNotification(
+                        "Successfully disconnected from Stripe!",
+                        "Reconnect with Stripe to create or host listings."
+                    );
+                    handleUserRefetch();
+                }
+            },
+            onError: () => {
+                displayErrorMessage(
+                    "Failed to disconnect from Stripe, please try again."
+                );
+            }
+        }
+    );
+
+    const redirectToStripe = () => {
+        window.location.href = stripeAuthUrl;
+    };
+
+    const additionalDetials = user.hasWallet ? (
+        <Fragment>
+            <Paragraph>
+                <Tag color="green">Stripe Registered</Tag>
+            </Paragraph>
+            <Paragraph>
+                Income Earned:{" "}
+                <Text strong>
+                    {user.income ? formatListingPrice(user.income) : `$0`}
+                </Text>
+            </Paragraph>
+            <Button
+                type="primary"
+                className="user-profile__details-cta"
+                loading={loading}
+                onClick={() => disconnectStripe()}
+            >
+                Disconnect Stripe
+            </Button>
+            <Paragraph type="secondary">
+                By disconnecting, you will not be able to receive{" "}
+                <Text strong>any further payments</Text>. This will
+                prevent users from booking any of your listings.
+            </Paragraph>
+        </Fragment>
+    ) : (
+        <Fragment>
+            <Paragraph>
+                Interested in becoming a host? Register with your Stripe account!
+            </Paragraph>
+            <Button 
+                type="primary" 
+                className="user-profile__details-cta"
+                onClick={redirectToStripe}
+            >
+                Connect with Stripe
+            </Button>
+            <Paragraph type="secondary">
+                This app uses{" "}
+                <a
+                    href="https://stripe.com/en-US/connect"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Stripe
+                </a>{" "}
+                to transfer earnings in a secure and trusted manner.
+            </Paragraph>
+        </Fragment>
+    );
+
+    const additionalDetailsSection = viewerIsUser ? (
+        <Fragment>
+            <Divider />
+            <div className="user-profile__details">
+                <Title level={4}>Additional Details</Title>
+                {additionalDetials}
+            </div>
+        </Fragment>
+    ) : null;
+
+    return (
+        <div className="user-profile">
+            <Card className="user-profile__card">
+                <div className="user-profile__avatar">
+                    <Avatar size={100} src={user.avatar} />
+                </div>
+                <Divider />
+                <div className="user-profile__details">
+                    <Title level={4}>Details</Title>
+                    <Paragraph>
+                        Name: <Text strong>{user.name}</Text>
+                    </Paragraph>
+                    <Paragraph>
+                        Contact: <Text strong>{user.contact}</Text>
+                    </Paragraph>
+                </div>
+                {additionalDetailsSection}
+            </Card>
+        </div>
+    )
+};
+
+/*
+(a)
+lookup types - https://www.typescriptlang.org/docs/handbook/release-notes/typescript-2-1.html#example-1
+    take advantage of autogenerated type definitions
+        ./client/src/lib/graphql/queries/User/__generated__/User.ts
+
+------------------------------------------------------------------
+export interface User_user {
+  __typename: "User";
+  id: string;
+  name: string;
+  avatar: string;
+  contact: string;
+  hasWallet: boolean;
+  income: number | null;
+}
+
+export interface User {
+  user: User_user;    <-- access type of user here -- User_user
+}
+---------------------------------------------------------------------
+
+User interface describes shape of data returned from user query
+    When looking to describe the shape of user prop passed down to UserProfle
+    Use [] bracket syntax to set its type as the type of user property
+    within the User data interface
+*/

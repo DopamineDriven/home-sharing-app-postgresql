@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "module": "commonjs",
+        "rootDir": "./src",
+        "outDir": "../homesharing-deploy/src",
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "strict": true,
+    },
+    "exclude": [
+        "node_modules",
+        "temp"
+    ]
+}
