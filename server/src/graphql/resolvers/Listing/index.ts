@@ -1,5 +1,5 @@
+import crypto from "crypto";
 import { IResolvers } from 'apollo-server-express';
-import { ObjectId } from "mongodb";
 import { Database, Listing, User, ListingType } from "../../../lib/types";
 import { 
     ListingArgs, 
@@ -10,7 +10,8 @@ import {
     ListingsFilter,
     ListingsQuery,
     HostListingArgs,
-    HostListingInput
+    HostListingInput,
+    Order
 } from "./types";
 import { Request } from "express";
 import { authorize } from "../../../lib/utils";
@@ -47,13 +48,13 @@ export const listingResolvers: IResolvers = {
             { db, req }: { db: Database; req: Request }
         ): Promise<Listing> => {
             try {
-                const listing = await db.listings.findOne({ _id: new ObjectId(id) });
+                const listing = (await db.listings.findOne({ id })) as Listing;
                 if (!listing) {
                     throw new Error("listing cannot be found");
                 }
 
                 const viewer = await authorize(db, req);
-                if (viewer && viewer._id === listing.host) {
+                if (viewer && viewer.id === listing.host) {
                     listing.authorized = true;
                 }
 
@@ -90,21 +91,26 @@ export const listingResolvers: IResolvers = {
                     data.region = `${cityText}${adminText}${country}`; 
                 }
 
-                let cursor = await db.listings.find(query);
+                let order: Order | null = null;
 
                 if (filter && filter === ListingsFilter.PRICE_LOW_TO_HIGH) {
-                    cursor = cursor.sort({ price: 1 });
+                    order = { price: "ASC" || 1 };
                 }
 
                 if (filter && filter === ListingsFilter.PRICE_HIGH_TO_LOW) {
-                    cursor = cursor.sort({ price: -1 });
+                    order = { price: "DESC" || -1 };
                 }
 
-                cursor = cursor.skip(page > 0 ? (page - 1) * limit : 0);
-                cursor = cursor.limit(limit);
+                const count = await db.listings.count(query);
+                const listings = await db.listings.find({
+                    where: { ...query },
+                    order: { ...order },
+                    skip: page > 0 ? (page - 1) * limit : 0,
+                    take: limit
+                });
 
-                data.total = await cursor.count();
-                data.result = await cursor.toArray();
+                data.total = count;
+                data.result = listings;
 
                 return data;
             } catch (error) {
@@ -132,8 +138,8 @@ export const listingResolvers: IResolvers = {
 
             const imageURL = await Cloudinary.upload(input.image);
 
-            const insertResult = await db.listings.insertOne({
-                _id: new ObjectId(),
+            const newListing: Listing = {
+                id: crypto.randomBytes(16).toString("hex"),
                 ...input,
                 image: imageURL,
                 bookings: [],
@@ -141,29 +147,24 @@ export const listingResolvers: IResolvers = {
                 country,
                 admin,
                 city,
-                host: viewer._id
-            });
+                host: viewer.id
+            };
 
-            const insertedListing: Listing = insertResult.ops[0];
+            const insertedListing = await db.listings.create(newListing).save();
 
-            await db.users.updateOne(
-                { _id: viewer._id },
-                { $push: { listings: insertedListing._id } }
-            );
+            viewer.listings.push(insertedListing.id);
+            await viewer.save();
 
             return insertedListing
         }
     },
     Listing: {
-        id: (listing: Listing): string => {
-            return listing._id.toHexString();
-        },
         host: async (
             listing: Listing,
             _args: {},
             { db }: { db: Database }
         ): Promise<User> => {
-            const host = await db.users.findOne({ _id: listing.host });
+            const host = await db.users.findOne({ id: listing.host });
             if (!host) {
                 throw new Error("host cannot be found");
             }
@@ -187,15 +188,13 @@ export const listingResolvers: IResolvers = {
                     result: []
                 };
 
-                let cursor = await db.bookings.find({
-                    _id: { $in: listing.bookings }
+                const bookings = await db.bookings.findByIds(listing.bookings, {
+                    skip: page > 0 ? (page-1) * limit : 0,
+                    take: limit
                 });
 
-                cursor = cursor.skip(page > 0 ? (page - 1) * limit : 0);
-                cursor = cursor.limit(limit);
-
-                data.total = await cursor.count();
-                data.result = await cursor.toArray();
+                data.total = listing.bookings.length;
+                data.result = bookings;
 
                 return data;
 
@@ -207,10 +206,10 @@ export const listingResolvers: IResolvers = {
 };
 
 /*
- As a reminder, the _id field for the user document in the 
+ As a reminder, the id field for the user document in the 
  Mongo database is of type string and not of type ObjectID. 
- MongoDB natively creates an ObjectID type for the _id fields 
- but the user's _id field is a string since it simply captures 
+ MongoDB natively creates an ObjectID type for the id fields 
+ but the user's id field is a string since it simply captures 
  whatever id Google OAuth returns. The host in a listing document 
  is the same string representation of this ID.
 */

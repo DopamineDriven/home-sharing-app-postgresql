@@ -51,6 +51,10 @@ export interface HostListingArgs {
     input: HostListingInput;
 }
 
+export interface Order {
+    price: 1 | "ASC" | "DESC" | -1 | undefined;
+}
+
 /*
 
 import Booking interface (descriptive of booking doc shape in database)
