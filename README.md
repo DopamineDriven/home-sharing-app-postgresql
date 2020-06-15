@@ -142,3 +142,26 @@ export const listingResolvers: IResolvers = {
 CREATE INDEX location_index ON public.listings (country, admin, city);
 ```
 - the syntax above was executed in pgAdmin
+
+### Booking a listing
+- Note: genuine card info cannot be used in test mode
+    - instead, use provided test card numbers, any valid future date, and any random CVC number to create a successful payment
+    - https://stripe.com/docs/testing
+    - for example
+        - Number
+            - 4242 4242 4242 4242
+        - Brand
+            - Visa
+        - CVC
+            - any 3 digits
+        - Date
+            - any future date
+    - likewise
+        - Number
+            - 3782 822463 10005
+        - Brand
+            - American Express
+        - CVC
+            - any 4 digits
+        - Date
+            - any future date

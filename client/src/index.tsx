@@ -54,6 +54,7 @@ const initalViewer: Viewer = {
 const App = () => {
 	const [viewer, setViewer] = useState<Viewer>(initalViewer);
 	const [logIn, { error }] = useMutation<LogInData, LogInVariables>(LOG_IN, {
+		
 		onCompleted: data => {
 			if (data && data.logIn) {
 				setViewer(data.logIn);

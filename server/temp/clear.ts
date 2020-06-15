@@ -12,6 +12,8 @@ const clear = async () => {
         await db.listings.clear();
         await db.users.clear();
 
+
+        console.log(`[clear]: success`);
     } catch {
         throw new Error(`[clear]: failed`);
     };

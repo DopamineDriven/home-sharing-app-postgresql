@@ -17,7 +17,7 @@ interface MatchParams {
     location: string;
 }
 
-const PAGE_LIMIT = 6;
+const PAGE_LIMIT = 8;
 
 const { Paragraph, Text, Title } = Typography;
 const { Content } = Layout;
