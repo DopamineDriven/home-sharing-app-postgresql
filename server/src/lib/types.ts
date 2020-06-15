@@ -52,7 +52,7 @@ export interface User {
     name: string;
     avatar: string;
     contact: string;
-    walletId?: string;
+    walletId?: string | null;
     income: number;
     bookings: string[];
     listings: string[];

@@ -8,8 +8,9 @@
 		"npm": "6.14.5"
 	},
 	"scripts": {
-		"devStart": "nodemon ./src/server.ts",
+		"start": "nodemon ./src/server.ts",
 		"seed": "ts-node temp/seed.ts",
+		"clear": "ts-node temp/clear.ts",
 		"build": "tsc -p ./"
 	},
 	"repository": {
