@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { IResolvers } from "apollo-server-express";
 import { Request } from "express";
-import { Booking, BookingsIndex, Database, Listing } from "../../../lib/types";
+import { Booking, BookingsIndex, Database } from "../../../lib/types";
 import { authorize } from "../../../lib/utils";
 import { CreateBookingArgs } from './types';
 import { Stripe } from "../../../lib/api";
@@ -114,37 +114,25 @@ export const bookingResolvers: IResolvers = {
 
                 await Stripe.charge(totalPrice, source, host.walletId);
 
-                // update bookings collection
-                const insertRes = await db.bookings.insertOne({
-                    _id: new ObjectId(),
-                    listing: listing._id,
-                    tenant: viewer._id,
+                const newBooking: Booking = {
+                    id: crypto.randomBytes(16).toString("hex"),
+                    listing: listing.id,
+                    tenant: viewer.id,
                     checkIn,
                     checkOut
-                });
+                };
 
-                const insertedBooking: Booking = insertRes.ops[0];
+                const insertedBooking = await db.bookings.create(newBooking).save();
 
-                // update user doc of host to increment income
-                await db.users.updateOne(
-                    { _id: host._id },
-                    { $inc: { income: totalPrice } }
-                );
+                host.income = host.income + totalPrice;
+                await host.save();
 
-                // update user doc of viewer
-                await db.users.updateOne(
-                    { _id: viewer._id },
-                    { $push: { bookings: insertedBooking._id } }
-                );
+                viewer.bookings.push(insertedBooking.id);
+                await viewer.save();
 
-                // update bookings field of listing document being booked
-                await db.listings.updateOne(
-                    { _id: listing._id },
-                    {
-                        $set: { bookingsIndex },
-                        $push: { bookings: insertedBooking._id }
-                    }
-                );
+                listing.bookingsIndex = bookingsIndex;
+                listing.bookings.push(insertedBooking.id);
+                await listing.save();
 
                 // return newly inserted booking
                 return insertedBooking;
@@ -155,16 +143,13 @@ export const bookingResolvers: IResolvers = {
         }
     },
     Booking: {
-        id: (booking: Booking): string => {
-            return booking._id.toHexString();
-        },
         // (a)
         listing: (
             booking: Booking,
             _args: {},
             { db }: { db: Database }
-        ): Promise<Listing | null> => {
-            return db.listings.findOne({ _id: booking.listing });
+        ) => {
+            return db.listings.findOne({ id: booking.listing });
         },
         tenant: (
             booking: Booking,
@@ -172,7 +157,7 @@ export const bookingResolvers: IResolvers = {
             { db }: { db: Database }
         ) => {
             return db.users.findOne({
-                _id: booking.tenant
+                id: booking.tenant
             });
         }
     }
@@ -189,6 +174,6 @@ additional explicit resolver function required
     Therefore, a resolver for the listing field is required as
     the additional explicit resolver
         this will find a single listing document from the listings
-        collection where the val of listing._id === id value of 
+        collection where the val of listing.id === id value of 
         the booking.listing field 
 */

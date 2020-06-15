@@ -141,3 +141,4 @@ export const listingResolvers: IResolvers = {
 ```sql
 CREATE INDEX location_index ON public.listings (country, admin, city);
 ```
+- the syntax above was executed in pgAdmin
