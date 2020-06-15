@@ -1,6 +1,6 @@
+import crypto from "crypto";
 import { IResolvers } from "apollo-server-express";
 import { Request } from "express";
-import { ObjectId } from "mongodb";
 import { Booking, BookingsIndex, Database, Listing } from "../../../lib/types";
 import { authorize } from "../../../lib/utils";
 import { CreateBookingArgs } from './types';
@@ -56,15 +56,13 @@ export const bookingResolvers: IResolvers = {
                     throw new Error("viewer cannot be found");
                 }
 
-                const listing = await db.listings.findOne({
-                    _id: new ObjectId(id)
-                });
+                const listing = await db.listings.findOne({ id });
 
                 if (!listing) {
                     throw new Error("listing cannot be found");
                 }
 
-                if (listing.host === viewer._id) {
+                if (listing.host === viewer.id) {
                     throw new Error("viewer cannot book their own listing");
                 }
 
@@ -105,7 +103,7 @@ export const bookingResolvers: IResolvers = {
                     );
 
                 const host = await db.users.findOne({
-                    _id: listing.host
+                    id: listing.host
                 });
 
                 if (!host || !host.walletId) {

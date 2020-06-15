@@ -3,19 +3,19 @@ import { Entity, BaseEntity, PrimaryColumn, Column } from "typeorm";
 @Entity("bookings")
 export class BookingEntity extends BaseEntity {
     @PrimaryColumn("text")
-    id: string | unknown;
+    id!: string;
 
     @Column("text")
-    listing: string | unknown;
+    listing!: string;
 
     @Column("text")
-    tenant: string | unknown;
+    tenant!: string;
 
     @Column("text")
-    checkIn: string | unknown;
+    checkIn!: string;
 
     @Column("text")
-    checkOut: string | unknown;
+    checkOut!: string;
 }
 
 /* eslint-disable @typescript-eslint/explicit-member-accessibility */

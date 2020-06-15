@@ -99,7 +99,7 @@ export const typeDefs = gql`
 			filter: ListingsFilter! 
 			limit: Int! 
 			page: Int!
-			): Listings!
+		): Listings!
 	}
 
 	type Mutation {

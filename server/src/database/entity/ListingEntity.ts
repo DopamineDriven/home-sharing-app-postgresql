@@ -4,44 +4,44 @@ import { BookingsIndex, ListingType } from "../../lib/types";
 @Entity("listings")
 export class ListingEntity extends BaseEntity {
 	@PrimaryColumn("text")
-	id: string | unknown;
+	id!: string;
 
 	@Column("varchar", { length: 100 })
-	title: string | unknown;
+	title!: string;
 
 	@Column("varchar", { length: 5000 })
-	description: string | unknown;
+	description!: string;
 
 	@Column("text")
-	image: string | unknown;
+	image!: string;
 
 	@Column("text")
-	host: string | unknown;
+	host!: string;
 
 	@Column({ type: "enum", enum: ListingType })
-	type: ListingType | unknown;
+	type!: ListingType;
 
 	@Column("text")
-	address: string | unknown;
+	address!: string;
 
 	@Column("text")
-	country: string | unknown;
+	country!: string;
 
 	@Column("text")
-	admin: string | unknown;
+	admin!: string;
 
 	@Column("text")
-	city: string | unknown;
+	city!: string;
 
 	@Column("simple-array")
-	bookings: string[] | unknown;
+	bookings!: string[];
 
 	@Column("simple-json")
-	bookingsIndex: BookingsIndex | unknown;
+	bookingsIndex!: BookingsIndex;
 
 	@Column("integer")
-	price: number | unknown;
+	price!: number;
 
 	@Column("integer")
-	numOfGuests: number | unknown;
+	numOfGuests!: number;
 }

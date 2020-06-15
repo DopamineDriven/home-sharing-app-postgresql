@@ -3,29 +3,29 @@ import { Entity, BaseEntity, PrimaryColumn, Column } from "typeorm";
 @Entity("users")
 export class UserEntity extends BaseEntity {
 	@PrimaryColumn("text")
-	id: string | unknown;
+	id!: string;
 
 	@Column("text")
-	token: string | unknown;
+	token!: string;
 
 	@Column("varchar", { length: 100 })
-	name: string | unknown;
+	name!: string;
 
 	@Column("text")
-	avatar: string | unknown;
+	avatar!: string;
 
 	@Column("text")
-	contact: string | unknown;
+	contact!: string;
 
 	@Column("text", { nullable: true })
 	walletId?: string | null;
 
     @Column("integer")
-	income: number | unknown;
+	income!: number;
 
 	@Column("simple-array")
-    bookings: string[] | unknown;
+    bookings!: string[];
     
     @Column("simple-array")
-	listings: string[] | unknown;
+	listings!: string[];
 }
