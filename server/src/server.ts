@@ -1,4 +1,5 @@
 require("dotenv").config();
+import "reflect-metadata";
 import express, { Application } from "express";
 import compression from "compression";
 import cors from "cors";

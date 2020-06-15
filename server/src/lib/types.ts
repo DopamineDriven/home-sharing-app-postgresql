@@ -1,4 +1,6 @@
+import { Repository } from "typeorm";
 import { Collection, ObjectId } from "mongodb";
+import { BookingEntity, ListingEntity, UserEntity } from "../database/entity";
 
 // bool values indicate which days in the month have been booked
 export interface BookingsIndexMonth {
