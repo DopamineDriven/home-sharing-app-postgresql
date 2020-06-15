@@ -1,12 +1,15 @@
 {
     "compilerOptions": {
-        "target": "ES5",
+        "target": "ESNext",
         "module": "commonjs",
         "rootDir": "./src",
         "outDir": "../homesharing-deploy/src",
         "sourceMap": true,
         "esModuleInterop": true,
         "strict": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true,
+        "strictPropertyInitialization": true
     },
     "exclude": [
         "node_modules",
