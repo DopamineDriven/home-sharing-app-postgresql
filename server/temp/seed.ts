@@ -781,8 +781,8 @@ const seed = async () => {
 		console.log(`[seed]: running...`);
 
 		const db = await connectDatabase();
+		
 		// define type of listings to add as an array of listing items via Listing[]
-
 		// loop through array insertOne document into collection at a time
 		for (const listing of listings) {
 			await db.listings.create(listing).save();

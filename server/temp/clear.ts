@@ -16,7 +16,7 @@ const clear = async () => {
         console.log(`[clear]: success`);
     } catch {
         throw new Error(`[clear]: failed`);
-    };
+    }
 };
 
 clear();
