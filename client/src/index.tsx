@@ -102,7 +102,7 @@ const App = () => {
 						<Route exact path="/listings/:location?">
 							<Listings />
 						</Route>
-						<Route exactpath ="/login">
+						<Route exact path ="/login">
 							<Login setViewer={setViewer} />
 						</Route>
 						<Route exact path="/stripe">
