@@ -1,6 +1,13 @@
 import { Repository } from "typeorm";
 import { BookingEntity, ListingEntity, UserEntity } from "../database/entity";
 
+export interface Viewer {
+    id?: string;
+    token?: string;
+    avatar?: string;
+    walletId?: string | null;
+    didRequest: boolean;
+}
 // bool values indicate which days in the month have been booked
 export interface BookingsIndexMonth {
     [key: string]: boolean;
@@ -57,14 +64,6 @@ export interface User {
     bookings: string[];
     listings: string[];
     authorized?: boolean;
-}
-
-export interface Viewer {
-    id?: string;
-    token?: string;
-    avatar?: string;
-    walletId?: string | null;
-    didRequest: boolean;
 }
 
 export interface Database {

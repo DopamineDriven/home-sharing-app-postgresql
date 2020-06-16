@@ -12,8 +12,9 @@ export const authorize = async (
         token
     });
 
-    return !viewer ? null : viewer; 
+    if (!viewer) return null;
     
+    return viewer;
 };
 
 
