@@ -165,3 +165,5 @@ CREATE INDEX location_index ON public.listings (country, admin, city);
             - any 4 digits
         - Date
             - any future date
+
+----------------------------------------------------------------------------------------------------------------------------------------------
