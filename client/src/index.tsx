@@ -102,25 +102,18 @@ const App = () => {
 						<Route exact path="/listings/:location?">
 							<Listings />
 						</Route>
-						<Route 
-							exact path="/login" 
-							render={
-								props => <Login {...props} setViewer={setViewer} />
-							} 
-						/>
-						<Route 
-							exact path="/stripe"
-							render={
-								props => <Stripe {...props} viewer={viewer} setViewer={setViewer} />
-							}
-						/>
-						<Route 
-							exact path="/user/:id" 
-							render={
-								props => <User {...props} viewer={viewer} setViewer={setViewer} />
-							}	 
-						/>
-						<Route component={NotFound} />
+						<Route exactpath ="/login">
+							<Login setViewer={setViewer} />
+						</Route>
+						<Route exact path="/stripe">
+							<Stripe viewer={viewer} setViewer={setViewer} />
+						</Route>
+						<Route exact path="/user/:id">
+							<User viewer={viewer} setViewer={setViewer} />
+						</Route>
+						<Route>
+							<NotFound />
+						</Route>
 					</Switch>
 				</Layout>
 			</Router>
