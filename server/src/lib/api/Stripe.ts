@@ -1,7 +1,8 @@
 import stripe from "stripe";
 
 const client = new stripe(`${process.env.S_SECRET_KEY}`, {
-    apiVersion: "2020-03-02"
+    apiVersion: "2020-03-02",
+    typescript: true
 });
 
 export const Stripe = {
